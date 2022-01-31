@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.system.coin.exchange.exception.CoinExchangeException;
 import com.system.coin.exchange.request.CoinExchangeRequest;
 import com.system.coin.exchange.service.CoinExchangeService;
 
@@ -21,12 +22,14 @@ public class CoinExchangeController implements CoinExchangeI {
 	
 	private Map<Double, Integer> sortedCoinCountMap;
 	
-	@Override
+    @Override
 	public ResponseEntity<Object> exchangeBills(@RequestBody CoinExchangeRequest request) {
 		try {
 			sortedCoinCountMap = coinExchangeService.exchange(request);
-		} catch (Exception e) {
+		} catch (CoinExchangeException e) {
 			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<Object>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<Object>(sortedCoinCountMap, HttpStatus.ACCEPTED);
 	}

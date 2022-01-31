@@ -3,14 +3,23 @@ package com.system.coin.exchange.service;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.system.coin.exchange.data.CoinCount;
+import com.system.coin.exchange.properties.ApplicationConfiguration;
 import com.system.coin.exchange.request.CoinExchangeRequest;
 
 @WebMvcTest(ValidatorServiceTest.class)
@@ -18,6 +27,16 @@ public class ValidatorServiceTest {
 
 	@Autowired
 	private ValidatorService validatorService;
+	
+	private static Map<Double,Integer> coinCountMap;
+	static {
+		
+		coinCountMap = new HashMap<Double, Integer>();
+		coinCountMap.put(Double.valueOf(0.25), Integer.valueOf(100));
+		coinCountMap.put(Double.valueOf(0.10), Integer.valueOf(100));
+		coinCountMap.put(Double.valueOf(0.05), Integer.valueOf(100));
+		coinCountMap.put(Double.valueOf(0.01), Integer.valueOf(100));
+	}
 	
     @Test
 	public void test_validate() throws Exception {

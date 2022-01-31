@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.system.coin.exchange.data.CoinCount;
-import com.system.coin.exchange.data.CoinState;
+import com.system.coin.exchange.exception.CoinExchangeException;
 import com.system.coin.exchange.request.CoinExchangeRequest;
 
 @Service
@@ -22,13 +22,15 @@ public class CoinExchangeService {
 	@Autowired
 	private ValidatorService validatorService;
 	
+	@Autowired
+	private CoinStateService coinStateService;
 	private Map<Double, Integer> responseCoinCountMap;
 	
 	public Map<Double, Integer> exchange(CoinExchangeRequest request) throws Exception {
 		validatorService.validate(request);
 		responseCoinCountMap = new HashMap<Double, Integer>();
 		Double totalAmount = Double.valueOf(request.getBill());
-		Map<Double, Integer> coinCountMap = CoinState.getCoinCountMap();
+		Map<Double, Integer> coinCountMap = coinStateService.getCoinCountMap();
 		if (!CollectionUtils.isEmpty(request.getCoinCountList())) {
 			List<CoinCount> sortedCoins = sortInReverseList(request);
 			for (CoinCount coinCount: sortedCoins) {
@@ -61,11 +63,11 @@ public class CoinExchangeService {
 			}
 		}
 		if (totalAmount > 0.00) { 
-			throw new Exception("Insufficient Funds");
+			throw new CoinExchangeException("Insufficient Funds");
 		}
         Map<Double, Integer> sortedCoinCountMap = sortInReverseMap(coinCountMap);
-        CoinState.setCoinCountMap(sortedCoinCountMap);
-        CoinState.printCoinAvailability();
+        CoinStateService.setCoinCountMap(sortedCoinCountMap);
+        CoinStateService.printCoinAvailability();
 		return responseCoinCountMap;
 	}
 

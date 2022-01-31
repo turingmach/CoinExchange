@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.system.coin.exchange.data.CoinCount;
+import com.system.coin.exchange.exception.CoinExchangeException;
 import com.system.coin.exchange.request.CoinExchangeRequest;
 
 @WebMvcTest(CoinExchangeServiceTest.class)
@@ -51,7 +52,7 @@ public class CoinExchangeServiceTest {
 		cointCountList.add(coinCount);
 		request.setCoinCountList(cointCountList);
 		Mockito.doNothing().when(validatorService).validate(request);
-		Throwable exception = Assert.assertThrows(Exception.class, () -> coinExchangeService.exchange(request));
+		Throwable exception = Assert.assertThrows(CoinExchangeException.class, () -> coinExchangeService.exchange(request));
 	    assertEquals("Insufficient Funds", exception.getMessage());
     }
 }
