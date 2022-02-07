@@ -2,6 +2,7 @@ package com.system.coin.exchange.service;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,17 +10,10 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.system.coin.exchange.data.CoinCount;
-import com.system.coin.exchange.properties.ApplicationConfiguration;
 import com.system.coin.exchange.request.CoinExchangeRequest;
 
 @WebMvcTest(ValidatorServiceTest.class)
@@ -42,7 +36,7 @@ public class ValidatorServiceTest {
 	public void test_validate() throws Exception {
 		CoinExchangeRequest request = new CoinExchangeRequest();
 		request.setBill(50);
-		CoinCount coinCount = new CoinCount(0.1, 5);
+		CoinCount coinCount = new CoinCount(BigDecimal.valueOf(0.1), 5);
 		List<CoinCount> cointCountList = new ArrayList<CoinCount>();
 		cointCountList.add(coinCount);
 		request.setCoinCountList(cointCountList);
@@ -62,7 +56,7 @@ public class ValidatorServiceTest {
 	public void test_validate_coins_failure() throws Exception {
 		CoinExchangeRequest request = new CoinExchangeRequest();
 		request.setBill(50);
-		CoinCount coinCount = new CoinCount(0.03, 5);
+		CoinCount coinCount = new CoinCount(BigDecimal.valueOf(0.03), 5);
 		List<CoinCount> cointCountList = new ArrayList<CoinCount>();
 		cointCountList.add(coinCount);
 		request.setCoinCountList(cointCountList);

@@ -1,20 +1,22 @@
 package com.system.coin.exchange.data;
 
+import java.math.BigDecimal;
+
 public class CoinCount {
 	
-	public CoinCount(Double coin, Integer count) {
+	public CoinCount(BigDecimal coin, Integer count) {
 		super();
 		this.coin = coin;
 		this.count = count;
 	}
 	
-	private Double coin;
+	private BigDecimal coin;
 	private Integer count;
 	
-	public Double getCoin() {
+	public BigDecimal getCoin() {
 		return coin;
 	}
-	public void setCoin(Double coin) {
+	public void setCoin(BigDecimal coin) {
 		this.coin = coin;
 	}
 	public Integer getCount() {

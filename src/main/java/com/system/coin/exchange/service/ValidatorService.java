@@ -1,9 +1,12 @@
 package com.system.coin.exchange.service;
 
+import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +22,6 @@ public class ValidatorService {
 	@Autowired
 	private CoinStateService coinStateService;
 	private List<Integer> validBills = Arrays.asList(1, 2, 5, 10, 20, 50, 100);
-	private List<Double> validCoins = Arrays.asList(0.01, 0.05, 0.10, 0.25);
 
 	public void validate(CoinExchangeRequest request) throws Exception {
 		
@@ -29,20 +31,20 @@ public class ValidatorService {
 	}
 
 	private void validateInputCoinsTotal(Integer bill, List<CoinCount> coinCountList) throws Exception {
-		Map<Double, Integer> coinCountMap = coinStateService.getCoinCountMap();
-		Double total = Double.valueOf(0.00);
+		Map<BigDecimal, Integer> coinCountMap = coinStateService.getCoinCountMap();
+		BigDecimal total = BigDecimal.valueOf(0.00);
 		if (!CollectionUtils.isEmpty(coinCountList)) {
 			for (CoinCount coinCount: coinCountList) {
 				validateCoinsAvailability(coinCount, coinCountMap);
-				total += coinCount.getCoin()* coinCount.getCount();
+				total = total.add(coinCount.getCoin().multiply(BigDecimal.valueOf(coinCount.getCount().longValue())));
 			}
 		}
-		if (total>bill) {
+		if (total.compareTo(BigDecimal.valueOf(bill.doubleValue())) == 1) {
 			throw new CoinExchangeException("Total value of Coin selection cannot be greater than the bill produced for exchange");
 		}
 	}
 
-	private void validateCoinsAvailability(CoinCount coinCount, Map<Double, Integer> coinCountMap) throws Exception {
+	private void validateCoinsAvailability(CoinCount coinCount, Map<BigDecimal, Integer> coinCountMap) throws Exception {
 		Integer cointCountInBank = coinCountMap.get(coinCount.getCoin());
 		if (coinCount.getCount() > cointCountInBank) {
 			throw new Exception(MessageFormat.format("Only {0} number of {1} are available", 
@@ -51,8 +53,8 @@ public class ValidatorService {
 	}
 
 //	private void validateFundsAvailability(Integer bill, List<CoinCount> coinCountList) throws Exception {
-//		Map<Double, Integer> coinCountMap = CoinState.getCoinCountMap();
-//		Double total = Double.valueOf(0.00);
+//		Map<BigDecimal, Integer> coinCountMap = CoinState.getCoinCountMap();
+//		BigDecimal total = BigDecimal.valueOf(0.00);
 //		if (!CollectionUtils.isEmpty(coinCountList)) {
 //			for (CoinCount coinCount: coinCountList) {
 //				validateCoinsAvailability(coinCount, coinCountMap);
@@ -73,6 +75,11 @@ public class ValidatorService {
 	}
 
 	private void validateCoins(List<CoinCount> coinCountList) throws Exception {
+		Map<BigDecimal, Integer> coinCountMap = coinStateService.getCoinCountMap();
+		List<BigDecimal> validCoins = new ArrayList<BigDecimal>();
+		for (Entry<BigDecimal, Integer> entry : coinCountMap.entrySet()) {
+			validCoins.add(entry.getKey());
+		}
 		if (!CollectionUtils.isEmpty(coinCountList)) {
 			for (CoinCount coinCount: coinCountList) {
 				if (!validCoins.contains(coinCount.getCoin()))

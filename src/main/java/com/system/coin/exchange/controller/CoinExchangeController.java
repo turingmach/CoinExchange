@@ -1,5 +1,6 @@
 package com.system.coin.exchange.controller;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class CoinExchangeController implements CoinExchangeI {
 	@Autowired
 	private CoinExchangeService coinExchangeService;
 	
-	private Map<Double, Integer> sortedCoinCountMap;
+	private Map<BigDecimal, Integer> sortedCoinCountMap;
 	
     @Override
 	public ResponseEntity<Object> exchangeBills(@RequestBody CoinExchangeRequest request) {

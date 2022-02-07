@@ -1,5 +1,6 @@
 package com.system.coin.exchange.service;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -24,17 +25,17 @@ public class CoinExchangeService {
 	
 	@Autowired
 	private CoinStateService coinStateService;
-	private Map<Double, Integer> responseCoinCountMap;
+	private Map<BigDecimal, Integer> responseCoinCountMap;
 	
-	public Map<Double, Integer> exchange(CoinExchangeRequest request) throws Exception {
+	public Map<BigDecimal, Integer> exchange(CoinExchangeRequest request) throws Exception {
 		validatorService.validate(request);
-		responseCoinCountMap = new HashMap<Double, Integer>();
-		Double totalAmount = Double.valueOf(request.getBill());
-		Map<Double, Integer> coinCountMap = coinStateService.getCoinCountMap();
+		responseCoinCountMap = new HashMap<BigDecimal, Integer>();
+		BigDecimal totalAmount = BigDecimal.valueOf(request.getBill());
+		Map<BigDecimal, Integer> coinCountMap = coinStateService.getCoinCountMap();
 		if (!CollectionUtils.isEmpty(request.getCoinCountList())) {
 			List<CoinCount> sortedCoins = sortInReverseList(request);
 			for (CoinCount coinCount: sortedCoins) {
-				totalAmount -= coinCount.getCoin()* coinCount.getCount();
+				totalAmount = totalAmount.subtract(coinCount.getCoin().multiply(BigDecimal.valueOf(coinCount.getCount().longValue())));
 				Integer count = coinCountMap.get(coinCount.getCoin());
 				coinCountMap.put(coinCount.getCoin(), count - coinCount.getCount());
 				if (responseCoinCountMap.containsKey(coinCount.getCoin())) {
@@ -45,12 +46,16 @@ public class CoinExchangeService {
 				}
 			}
 		}
-		if (totalAmount > 0.00) { 
-			for (Entry<Double, Integer> entry : coinCountMap.entrySet()) {
-				while (totalAmount > 0 && entry.getValue() > 0) {
+		if (totalAmount.compareTo(BigDecimal.valueOf(0.00)) == 1) { 
+			for (Entry<BigDecimal, Integer> entry : coinCountMap.entrySet()) {
+				while ((totalAmount.compareTo(entry.getKey()) == 1 || totalAmount.compareTo(entry.getKey()) == 0)
+						&& entry.getValue() > 0
+						) {
 					Integer numOfCoins = Integer.min(entry.getValue(), 
-							Integer.valueOf(((int)(totalAmount*100))/(int)(entry.getKey()*100)));
-					totalAmount -= numOfCoins*entry.getKey(); 
+							Integer.valueOf(
+									(totalAmount.multiply(BigDecimal.valueOf(100.00))).intValue())/
+									(entry.getKey().multiply(BigDecimal.valueOf(100.00)).intValue()));
+					totalAmount = totalAmount.subtract(entry.getKey().multiply(BigDecimal.valueOf(numOfCoins))); 
 					Integer count = coinCountMap.get(entry.getKey());
 					coinCountMap.put(entry.getKey(), count - numOfCoins);
 					if (responseCoinCountMap.containsKey(entry.getKey())) {
@@ -62,17 +67,17 @@ public class CoinExchangeService {
 				}
 			}
 		}
-		if (totalAmount > 0.00) { 
+		if (totalAmount.compareTo(BigDecimal.valueOf(0.00)) == 1) { 
 			throw new CoinExchangeException("Insufficient Funds");
 		}
-        Map<Double, Integer> sortedCoinCountMap = sortInReverseMap(coinCountMap);
+        Map<BigDecimal, Integer> sortedCoinCountMap = sortInReverseMap(coinCountMap);
         CoinStateService.setCoinCountMap(sortedCoinCountMap);
         CoinStateService.printCoinAvailability();
 		return responseCoinCountMap;
 	}
 
-	private Map<Double, Integer> sortInReverseMap(Map<Double, Integer> coinCountMap) {
-		Map<Double, Integer> sortedCoinCountMap = coinCountMap.entrySet().stream()
+	private Map<BigDecimal, Integer> sortInReverseMap(Map<BigDecimal, Integer> coinCountMap) {
+		Map<BigDecimal, Integer> sortedCoinCountMap = coinCountMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));

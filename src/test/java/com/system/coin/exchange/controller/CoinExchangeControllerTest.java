@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,8 +39,8 @@ public class CoinExchangeControllerTest {
 		
 		CoinExchangeRequest request = new CoinExchangeRequest();
 		request.setBill(1);
-		Map<Double, Integer> mockResponseMap = new HashMap<Double, Integer>();
-		mockResponseMap.put(0.25, 4);
+		Map<BigDecimal, Integer> mockResponseMap = new HashMap<BigDecimal, Integer>();
+		mockResponseMap.put(BigDecimal.valueOf(0.25), 4);
 		
 	    Mockito.when(mockCoinExchangeService.exchange(request)).thenReturn(mockResponseMap);
 	    MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/exchange")
